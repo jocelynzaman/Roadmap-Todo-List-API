@@ -16,3 +16,13 @@ info:
   version: 1.0.0
 servers:
   - url: localhost:8094/
+tags:
+  - name: user authentication
+    description: Sign up or log in to access to do list
+paths:
+  /register:
+    post:
+      tags:
+        - user authentication
+      summary: Register a new user
+      description: Register a new user to access to do list
