@@ -1,0 +1,18 @@
+openapi: 3.1.0
+info:
+  title: to do list - OpenAPI 3.1
+  description: |-
+    This is a to do list server based on roadmap.sh's project specifications.
+    Find out more at: 
+      https://roadmap.sh/projects/todo-list-api
+    
+    Useful links:
+    - [to do list repository](https://github.com/jocelynzaman/Roadmap-Todo-List-API)
+
+  contact:
+    email: jocelynzaman@gmail.com
+  license:
+    name: MIT
+  version: 1.0.0
+servers:
+  - url: localhost:8094/
