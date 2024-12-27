@@ -37,7 +37,7 @@ public class UserRegistration {
     {
         this.name = name;
         this.email = email;
-        this.password = hashPassword(password);
+        this.password = password;
     }
 
     // getters
@@ -61,16 +61,18 @@ public class UserRegistration {
         return password;
     }
 
-    // setters
-    public void setPassword(String password)
-    {
-        this.password = hashPassword(password);
+    // hash password for security
+    public void hashPassword(String password) {
+        BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+        this.password = passwordEncoder.encode(password);
     }
 
-    // hash password for security
-    private String hashPassword(String password) {
-        BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-        return passwordEncoder.encode(password);
+    // match password for login
+    public boolean isPasswordValid(String hashPassword)
+    {
+        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+        boolean matchPassword = encoder.matches(this.password, hashPassword);
+        return matchPassword;
     }
 
     @Override
