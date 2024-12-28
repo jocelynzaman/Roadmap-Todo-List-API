@@ -20,6 +20,12 @@ public class InvalidInputException extends RuntimeException {
         this.message = email + " is invalid. Please correct and try again";
     }
 
+    public InvalidInputException(String type, String input)
+    {
+        super(type + " failed. Your email or password is incorrect. Please try again.");
+        this.message = type + " failed. Your " + input + " is incorrect. Please try again.";
+    }
+
     public String getMessage()
     {
         return this.message;
