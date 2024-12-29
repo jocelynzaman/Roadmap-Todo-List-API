@@ -22,6 +22,12 @@ public class LoginController {
     public ResponseEntity<String> loginUser(@RequestBody UserRegistration userRegistration) {
         try
         {
+            // valid inputs aren't empty
+            if (userRegistration == null || userRegistration.getEmail() ==  "" || userRegistration.getPassword() == "")
+            {
+                throw new InvalidInputException(userRegistration);
+            }
+
             // validate login
             Token token = service.loginUser(userRegistration);
             return ResponseEntity.status(HttpStatus.OK).body(token.getToken());
