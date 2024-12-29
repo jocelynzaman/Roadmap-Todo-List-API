@@ -39,10 +39,10 @@ public class Token {
         return token;
     }
 
-    // setters
-    public void setToken(String token)
+    // generate new token
+    public void updateToken()
     {
-        this.token = token;
+        this.token = generateToken();
     }
 
     // generate alphanumeric characters for token

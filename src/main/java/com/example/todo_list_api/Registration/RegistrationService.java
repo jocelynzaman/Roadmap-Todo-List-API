@@ -35,9 +35,9 @@ public class RegistrationService {
         }
         else 
         {
-            UserRegistration newUser = new UserRegistration(user.getName(), user.getEmail(), user.getPassword());
-            userRepository.save(newUser);
-            return newUser;
+            user.hashPassword(user.getPassword());
+            userRepository.save(user);
+            return user;
         }
     }
 

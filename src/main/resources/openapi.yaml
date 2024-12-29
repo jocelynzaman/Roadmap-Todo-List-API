@@ -47,6 +47,33 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RegistrationException'
+  /login:
+    post:
+      tags:
+        - user authentication
+      summary: Login existing user
+      description: Login existing user to access to do list
+      operationId: loginUser
+      requestBody:
+        description: Authenticate existing user
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRegistration'
+        required: true
+      responses:
+        '200':
+          description: Successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Token'
+        '401':
+          description: Unauthorized user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegistrationException'
 components:
   schemas:
     UserRegistration:
