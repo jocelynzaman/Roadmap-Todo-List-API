@@ -26,3 +26,83 @@ paths:
         - user authentication
       summary: Register a new user
       description: Register a new user to access to do list
+      operationId: registerUser
+      requestBody:      
+        description: Create a new user
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRegistration'
+        required: true
+      responses:
+        '201':
+          description: Successful 
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Token'
+        '400':
+          description: Missing or invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegistrationException'
+  /login:
+    post:
+      tags:
+        - user authentication
+      summary: Login existing user
+      description: Login existing user to access to do list
+      operationId: loginUser
+      requestBody:
+        description: Authenticate existing user
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRegistration'
+        required: true
+      responses:
+        '200':
+          description: Successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Token'
+        '401':
+          description: Unauthorized user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegistrationException'
+components:
+  schemas:
+    UserRegistration:
+      type: object
+      properties:
+        name:
+          type: string
+          examples: ["Dipper Pines"]
+        email:
+          type: string
+          examples: ["Dipper.Pines@gmail.com"]
+        password:
+          type: string
+          examples: ["gravity"]
+    Token:
+      type: object
+      properties:
+        token:
+          type: string
+          examples: ["EewQoOTnJ7M6EuElcJZFgtssu"]
+    RegistrationException:
+      type: object
+      properties:
+        message:
+          type: string
+  requestBodies:
+    UserRegistration:
+      description: User object that needs to be added to the application
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UserRegistration'
