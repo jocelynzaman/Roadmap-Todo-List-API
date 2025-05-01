@@ -1,14 +1,20 @@
 package com.example.todo_list_api.Todo;
 
+import com.example.todo_list_api.User.User;
+
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "todo_items")
+@Table(name = "todo")
 public class Todo {
     @Id //primary key
     @GeneratedValue(strategy=GenerationType.AUTO)
@@ -21,12 +27,9 @@ public class Todo {
     @Column(name = "description")
     private String description;
 
-    @Column(name = "user_id", nullable = false)
-    private Long user_id;
-
-    // @ManyToOne
-    // @JoinColumn(name = "user_id")
-    // private UserRegistration user;
+    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private User userInfo;
 
     public Todo()
     {
@@ -46,22 +49,10 @@ public class Todo {
         this.description = description;
     }
 
-    public Todo(Long id, String title, String description)
-    {
-        this.id = id;
-        this.title = title;
-        this.description = description;
-    }
-
     // getters
     public Long getId()
     {
         return this.id;
-    }
-
-    public Long getUserId()
-    {
-        return this.user_id;
     }
 
     public String getTitle()
@@ -74,16 +65,12 @@ public class Todo {
         return this.description;
     }
 
-    // setters
-    public void setUserId(Long userId)
+    public User getUserInfo()
     {
-        this.user_id = userId;
+        return this.userInfo;
     }
-    // public void setUser(UserRegistration user)
-    // {
-    //     this.user = user;
-    // }
 
+    // setters
     public void setTitle(String title)
     {
         this.title = title;
@@ -92,6 +79,11 @@ public class Todo {
     public void setDescription(String description)
     {
         this.description = description;
+    }
+
+    public void setUserInfo(User userInfo)
+    {
+        this.userInfo = userInfo;
     }
 
     @Override

@@ -4,7 +4,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
-import com.example.todo_list_api.Registration.InvalidInputException;
+import com.example.todo_list_api.Authentication.Authentication;
+import com.example.todo_list_api.Authentication.AuthenticationService;
+import com.example.todo_list_api.User.User;
+import com.example.todo_list_api.User.UserService;
+import com.example.todo_list_api.exceptions.InvalidInputException;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -28,6 +32,12 @@ public class TodoController {
     @Autowired
     private TodoService service;
 
+    @Autowired
+    private AuthenticationService authService;
+
+    @Autowired
+    private UserService userService;
+
     @PostMapping
     public ResponseEntity<Todo> createTodos(@RequestHeader("Authorization") String authToken, @RequestBody Todo newTodo) 
     {
@@ -39,7 +49,12 @@ public class TodoController {
                 throw new InvalidInputException("Authentication", "token");
             }
 
-            Todo todo = service.createTodo(authToken.substring(7), newTodo);
+            // validate authentication
+            Authentication auth = authService.getAuthentication(authToken.substring(7));
+            User foundUser = userService.getUser(auth.getUserInfo().getId());
+            System.out.println("ID from user: " + foundUser.getId());
+
+            Todo todo = service.createTodo(foundUser, newTodo);
             return new ResponseEntity<Todo>(todo, HttpStatus.OK);
         }
         catch (InvalidInputException exception)
@@ -53,7 +68,17 @@ public class TodoController {
     {
         try
         {
-            Todo todo = service.updateTodo(authToken.substring(7), Long.valueOf(param), updateTodo);
+            if (authToken ==  null || authToken.isEmpty())
+            {
+                throw new InvalidInputException("Authentication", "token");
+            }
+
+            // validate authentication
+            Authentication auth = authService.getAuthentication(authToken.substring(7));
+            User foundUser = userService.getUser(auth.getUserInfo().getId());
+            System.out.println("ID from user: " + foundUser.getId());
+
+            Todo todo = service.updateTodo(foundUser.getId(), Long.valueOf(param), updateTodo);
             return new ResponseEntity<Todo>(todo, HttpStatus.OK);
         }
         catch (InvalidInputException exception)
@@ -67,7 +92,17 @@ public class TodoController {
     {
         try
         {
-            service.deleteTodo(authToken.substring(7), todoId);
+            if (authToken ==  null || authToken.isEmpty())
+            {
+                throw new InvalidInputException("Authentication", "token");
+            }
+
+            // validate authentication
+            Authentication auth = authService.getAuthentication(authToken.substring(7));
+            User foundUser = userService.getUser(auth.getUserInfo().getId());
+            System.out.println("ID from user: " + foundUser.getId());
+
+            service.deleteTodo(foundUser.getId(), todoId);
             return new ResponseEntity<Object>(HttpStatus.NO_CONTENT);
         }   
         catch (InvalidInputException exception)
@@ -81,7 +116,17 @@ public class TodoController {
     {
         try
         {
-            Page<Todo> todoList = service.getAllTodos(authToken.substring(7), page = 1, limit = 5);
+            if (authToken ==  null || authToken.isEmpty())
+            {
+                throw new InvalidInputException("Authentication", "token");
+            }
+
+            // validate authentication
+            Authentication auth = authService.getAuthentication(authToken.substring(7));
+            User foundUser = userService.getUser(auth.getUserInfo().getId());
+            System.out.println("ID from user: " + foundUser.getId());
+
+            Page<Todo> todoList = service.getAllTodos(foundUser.getId(), page = 1, limit = 5);
 
             LinkedHashMap<String, Object> todoPage = new LinkedHashMap<String, Object>();
             todoPage.put("data", todoList.getContent());

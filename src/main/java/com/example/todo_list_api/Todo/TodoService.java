@@ -7,115 +7,79 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import com.example.todo_list_api.Registration.InvalidInputException;
-import com.example.todo_list_api.Registration.Token;
-import com.example.todo_list_api.repository.AuthRepository;
-import com.example.todo_list_api.repository.TodoRepository;
-import com.example.todo_list_api.repository.UserRepository;
+import com.example.todo_list_api.User.User;
+import com.example.todo_list_api.exceptions.InvalidInputException;
 
 @Service
 public class TodoService {
     @Autowired
-    private AuthRepository authRepository;
+    private TodoRepository repository;
 
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private TodoRepository todoRepository;
-
-    public Token findTokenByValue(String todoToken)
+    public Todo getTodoById(Long todoId)
     {
-        Token foundToken = authRepository.findByToken(todoToken);
-        if (foundToken != null && userRepository.existsById(foundToken.getId()) && foundToken.getToken().equals(todoToken))
-        {
-            return foundToken;
-        }
-        else
-        {
-            throw new InvalidInputException("Authorization", "token");
-        }
-    }
-
-    public Todo findTodoById(Long todoId)
-    {
-        Todo foundTodo = todoRepository.findById(todoId);
+        Todo foundTodo = repository.findById(todoId);
         if (foundTodo != null)
         {
             return foundTodo;
         }
         else
         {
-            throw new InvalidInputException("Finding to-do item", "to-do id");
+            throw new InvalidInputException("Finding to-do item", "to-do id: " + todoId);
         }
     }
 
-    public void validateUserId(Long tokenId, Long todoUserId)
+    // check that owner of to-do item matches user
+    public void isOwnerOfTodo(Long userId, Long ownerId)
     {
-        if (!tokenId.equals(todoUserId))
+        if (userId != ownerId)
         {
-            throw new InvalidInputException("User permission", "token");
+            throw new InvalidInputException("User permission", "token: " + userId);
         }
     }
 
     // create to do item
-    public Todo createTodo(String todoToken, Todo newTodo)
+    public Todo createTodo(User owner, Todo newTodo)
     {
-        // validate authentication
-        Token foundToken = findTokenByValue(todoToken);
-        System.out.println("ID from user: " + userRepository.findById(foundToken.getId()).get().getId());
-
-        newTodo.setUserId(foundToken.getId());
-        System.out.println("ID: " + newTodo.getId());
-        todoRepository.save(newTodo);
+        newTodo.setUserInfo(owner);
+        repository.save(newTodo);
         return newTodo;
     }
 
     // update to do item
-    public Todo updateTodo(String todoToken, Long todoId, Todo updateTodo)
+    public Todo updateTodo(Long userId, Long todoId, Todo updateTodo)
     {
-        // validate authentication
-        Token foundToken = findTokenByValue(todoToken);
-        System.out.println("ID from user: " + userRepository.findById(foundToken.getId()).get().getId());
-
         // validate to do item exists
-        Todo existingTodo = findTodoById(todoId);
+        Todo existingTodo = getTodoById(todoId);
 
         // validate authorization
-        validateUserId(foundToken.getId(), existingTodo.getUserId());
+        isOwnerOfTodo(userId, existingTodo.getUserInfo().getId());
 
         // update existing to do item
         existingTodo.setTitle(updateTodo.getTitle());
         existingTodo.setDescription(updateTodo.getDescription());
-        todoRepository.save(existingTodo);
+        repository.save(existingTodo);
         return existingTodo;
     }
 
     // delete to do item
-    public void deleteTodo(String todoToken, Long todoId)
+    public void deleteTodo(Long userId, Long todoId)
     {
-        // validate authentication
-        Token foundToken = findTokenByValue(todoToken);
-        // System.out.println("ID from user: " + userRepository.findById(foundToken.getId()).get().getId());
-
         // validate to do item exists
-        Todo existingTodo = findTodoById(todoId);
+        Todo existingTodo = getTodoById(todoId);
 
         // validate authorization
-        validateUserId(foundToken.getId(), existingTodo.getUserId());
+        isOwnerOfTodo(userId, existingTodo.getUserInfo().getId());
 
-        todoRepository.deleteById(todoId);
+        repository.deleteById(todoId);
     }
 
     // retrieve to do items
-    public Page<Todo> getAllTodos(String todoToken, int page, int limit)
+    public Page<Todo> getAllTodos(Long userId, int page, int limit)
     {
-        // validate authorization
-        Token foundToken = findTokenByValue(todoToken);
-        System.out.println("ID from user: " + userRepository.findById(foundToken.getId()).get().getId());
+        // TODO: filter by owner
 
         Pageable pageQuery = PageRequest.of(page-1, limit, Sort.by("id").ascending());
 
-        return todoRepository.findAll(pageQuery);
+        return repository.findAll(pageQuery);
     }
 }
