@@ -32,7 +32,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UserRegistration'
+              $ref: '#/components/schemas/UserRegistrationRequest'
         required: true
       responses:
         '201':
@@ -59,7 +59,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UserRegistration'
+              $ref: '#/components/schemas/Authentication'
         required: true
       responses:
         '200':
@@ -73,10 +73,134 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RegistrationException'
+                $ref: '#/components/schemas/AuthorizationException'
+  /todos:
+    post:
+      tags:
+        - to-do item
+      summary: Create new to-do item
+      description: Create new to-do item for user
+      operationId: createTodos
+      parameters:
+        - in: header
+          name: Authorization
+          schema:
+            $ref: '#/components/schemas/Token'
+          required: true
+      requestBody:
+        description: Create new to-do item
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TodoItemRequest'
+        required: true
+      responses:
+        '200':
+          description: Successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TodoItem'
+        '401':
+          description: Unauthorized user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthorizationException'
+    get:
+      tags:
+        - to-do item
+      summary: List all to-do items
+      description: List all to-do items with optional paging and limit
+      operationId: getTodos
+      parameters:
+        - in: query
+          name: page
+          description: set page number for list
+          schema:
+            type: integer
+            default: 1
+          required: false
+        - in: query
+          name: limit
+          description: set max number of to-do items to display
+          schema:
+            type: integer
+            default: 5
+          required: false
+      responses:
+        '200':
+          description: Successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TodoItemList'
+        '401':
+          description: Unauthorized user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthorizationException'
+  /todos/{todoId}:
+    put:
+      tags:
+        - to-do item
+      summary: Update an existing to-do item
+      description: Update an existing to-do item by id
+      operationId: updateTodos
+      parameters:
+        - in: path
+          name: todoId
+          description: ID of to-do item to update
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        description: Create new to-do item
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TodoItemRequest'
+        required: true
+      responses:
+        '200':
+          description: Successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TodoItem'
+        '401':
+          description: Unauthorized user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthorizationException'
+    delete:
+      tags:
+        - to-do item
+      summary: Update an existing to-do item
+      description: Update an existing to-do item by id
+      operationId: removeTodos
+      parameters:
+        - in: path
+          name: todoId
+          required: true
+          description: ID of to-do item to update
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Successful
+        '401':
+          description: Unauthorized user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthorizationException'
+
 components:
   schemas:
-    UserRegistration:
+    UserRegistrationRequest:
       type: object
       properties:
         name:
@@ -88,21 +212,80 @@ components:
         password:
           type: string
           examples: ["gravity"]
-    Token:
+    Authentication:
       type: object
       properties:
-        token:
+        email:
           type: string
-          examples: ["EewQoOTnJ7M6EuElcJZFgtssu"]
+          examples: ["Dipper.Pines@gmail.com"]
+        password:
+          type: string
+          examples: ["gravity"]
+    Token:
+      type: string
+      examples: ["EewQoOTnJ7M6EuElcJZFgtssu"]
+    TodoItemRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          examples: ["grocery"]
+        description:
+          type: string
+          examples: ["milk and eggs"]
+    TodoItem:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+          examples: ["grocery"]
+        description:
+          type: string
+          examples: ["milk and eggs"]
+    TodoItemList:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/TodoItem'
+        page:
+          type: integer
+          examples: [1]
+        limit:
+          type: integer
+          examples: [5]
+        total:
+          type: integer
+          examples: [3]
     RegistrationException:
       type: object
       properties:
         message:
           type: string
+    AuthorizationException:
+      type: object
+      properties:
+        message:
+          type: string
   requestBodies:
-    UserRegistration:
+    UserRegistrationRequest:
       description: User object that needs to be added to the application
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/UserRegistration'
+            $ref: '#/components/schemas/UserRegistrationRequest'
+    Authentication:
+      description: Authentication details that needs to be validated by application
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Authentication'
+    TodoItemRequest:
+      description: Todo object that needs to be added to the application
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/TodoItemRequest'
