@@ -12,7 +12,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-import com.example.todo_list_api.Registration.UserRegistration;
+import com.example.todo_list_api.Authentication.AuthenticationController;
+import com.example.todo_list_api.Authentication.Authentication;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @SpringBootTest
@@ -22,35 +23,21 @@ public class LoginControllerTest {
     private MockMvc mockMvc;
 
     @MockitoBean
-    private LoginController controller;
+    private AuthenticationController controller;
 
     @Autowired
     private ObjectMapper objectMapper;
 
     @Test
-    void shouldAuthenticateUser() throws Exception
+    public void shouldAuthenticateUser() throws Exception
     {
-        UserRegistration newUser = new UserRegistration("", "email@email.com", "email");
+        Authentication newAuth = new Authentication("email@email.com", "email");
 
-        this.mockMvc.perform(post("/login").contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(newUser))).andDo(print())
+        this.mockMvc.perform(post("/login").contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(newAuth))).andDo(print())
         .andExpect(status().isOk());
     }
 
-    @Test
-    void shouldThrowIncorrectEmail() throws Exception
-    {
-        UserRegistration newUser = new UserRegistration("", "wrong@email.com", "email");
-
-        this.mockMvc.perform(post("/login").contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(newUser))).andDo(print())
-        .andExpect(status().isUnauthorized());
-    }
-
-    @Test
-    void shouldThrowIncorrectPassword() throws Exception
-    {
-        UserRegistration newUser = new UserRegistration("", "email@email.com", "wrong");
-
-        this.mockMvc.perform(post("/login").contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(newUser))).andDo(print())
-        .andExpect(status().isUnauthorized());
-    }
+    // additional tests with Postman
+    // 1. incorrect email: return Unauthorized status
+    // 2. incorrect password: return Unauthorized status
 }

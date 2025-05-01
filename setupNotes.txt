@@ -1,0 +1,87 @@
+setting project
+    - vs code
+    - java
+    - oracle database
+    - docker
+    - maven or gradle (need to download maven, extract, and add path variable to bin directory)
+
+https://spring.io/guides/tutorials/rest
+download latest jdk from oracle
+
+install spring initialzr from vs code extensions
+create project with spring initializr in vscode's command pallete
+add dependencies:
+    - spring web //rest operations
+    - spring data jpa //data operations
+    - oracle driver //connect to oracle database
+------------------------------------
+//set up database
+
+install Oracle Developer Tools for VS Code from vs code extensions
+install oracle database: use docker to pull container image
+run oracle database image in docker with custom config to set password
+    - reference: search for oracle container registry page in oracle website
+    - docker run -d -p <host_port>:<container_port> --name <container_name> -e <password_variable>=<password_value> <image_name>
+        p option publishes the container's port to the host allows for the port running the container to be allows traffic directed at host port to be forwarded to the container's port making the container's service accessible from outside the container
+    - docker run -d -p 1521:1521 --name oracle-docker -e ORACLE_PWD=sys123 container-registry.oracle.com/database/free:latest
+
+set password in case default was not set
+    - in docker exec window, run ./setPassword.sh <password>
+
+check that user can be connected from within the docker container using exec window
+    - command to connect: sqlplus sys@localhost:1521/FREEPDB1 as sysdba
+
+References:
+    - Connect string format: [username]@[hostname]:[port]/[DB service name] [AS SYSDBA]
+    - command to connect: sqlplus sys@localhost:1521/FREEPDB1 as sysdba
+    - username: sys
+    - password: oracle
+    - hostname: localhost
+    - port = 1521
+    - db service name: database = FREEPDB1
+
+click oracle explorer (or SQL Developer) in vs code left icon menu
+create new database connection
+    - service name: from the docker image = FREEPDB1
+    - role: SYSDBA
+    - username: sys
+    - password: set from docker run command or resetting password
+
+//run container
+docker start <container_name>
+------------------------
+//database set up
+
+create table in Oracle Expolorer
+    - right click the database name -> open new sql file
+
+//add dependency to project
+src\main\resources\application.properties
+    - add oracle database port and log in info
+
+----------------------
+//dependency set up
+
+for gradle project
+    - edit the build.gradle file
+
+for maven project
+    - edit the pom.xml file
+
+-------------------------
+//learnings
+
+getters from Entity class create the json data response
+
+in service tests, Mockito when() method allows for stubbing which provides control for the behavior of a specific method called
+in this case, the Mock field is the repository so stubbing can control the actions taken when repository's methods are invoked
+
+------------------------
+//running tests
+1. start oracle-docker container in docker
+2. run tests
+-------------------------
+//running program
+1. start database with docker (to-do-db2)
+2. start java program
+3. use postman to send requests

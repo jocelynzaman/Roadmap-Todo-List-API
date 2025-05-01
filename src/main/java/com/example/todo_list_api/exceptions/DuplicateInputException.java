@@ -1,4 +1,4 @@
-package com.example.todo_list_api.Registration;
+package com.example.todo_list_api.exceptions;
 
 /*
  * validate that a unique parameter doesn't exist in the database
