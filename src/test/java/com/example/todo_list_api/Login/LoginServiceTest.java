@@ -13,16 +13,19 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.example.todo_list_api.Registration.InvalidInputException;
-import com.example.todo_list_api.Registration.Token;
-import com.example.todo_list_api.Registration.UserRegistration;
-import com.example.todo_list_api.repository.AuthRepository;
-import com.example.todo_list_api.repository.UserRepository;
+import com.example.todo_list_api.Authentication.AuthRepository;
+import com.example.todo_list_api.Authentication.Authentication;
+import com.example.todo_list_api.Authentication.AuthenticationService;
+import com.example.todo_list_api.User.User;
+import com.example.todo_list_api.User.UserRegistrationRequest;
+import com.example.todo_list_api.User.UserRepository;
+import com.example.todo_list_api.exceptions.DuplicateInputException;
+import com.example.todo_list_api.exceptions.InvalidInputException;
 
 @ExtendWith(MockitoExtension.class)
 public class LoginServiceTest {
     @InjectMocks
-    private LoginService service;
+    private AuthenticationService service;
 
     @Mock
     private UserRepository userRepository;
@@ -30,37 +33,33 @@ public class LoginServiceTest {
     @Mock
     private AuthRepository authRepository;
 
-    // update token
+    // create token
     @Test
-    void updateToken()
+    public void createToken()
     {
-        UserRegistration newUser = new UserRegistration("wicked", "wicked@wick.com", "revenge");
+        // set up a new user request
+        UserRegistrationRequest userToRegister = new UserRegistrationRequest("wicked", "wicked@wick.com", "revenge");
+
+        User newUser = new User(userToRegister.getName());
         userRepository.save(newUser);
-
-        Token newToken = new Token(newUser.getId());
-        authRepository.save(newToken);
-
-        when(authRepository.save(any(Token.class))).thenReturn(newToken);
+        // when(authRepository.save(any(Authentication.class))).thenReturn(newToken);
         
-        Token updatedToken = service.loginUser(newUser);
-
-        assertNotNull(newToken);
-        assertEquals(newToken.getId(), updatedToken.getId());
-        assertNotEquals(newToken.getToken(), updatedToken.getToken());
+        Authentication createdToken = service.createAuthentication(newUser, userToRegister.getEmail(), userToRegister.getPassword());
+        assertNotNull(createdToken);
+        assertEquals(newUser.getId(), createdToken.getUserInfo().getId());
     }
 
-    // match password
     @Test
-    void shouldThrowInvalidPassword() throws Exception
+    public void shouldThrowInvalidEmail() throws Exception
     {
-        UserRegistration newUser = new UserRegistration("wicked", "wicked@wick.com", "revenge");
-        userRepository.save(newUser);
-        UserRegistration wrongPassword = new UserRegistration("wicked", "wicked@wick.com", "avenge");
-        // UserRegistration foundUser = userRepository.findByEmail(newUser.getEmail());
-        // boolean isPasswordValid = newUser.isPasswordValid(foundUser.getPassword());
+        UserRegistrationRequest userToRegister = new UserRegistrationRequest("wicked", "-wicked@wick.com", "revenge");
 
-        Exception e = assertThrows(InvalidInputException.class, () -> service.loginUser(wrongPassword));
-        assertEquals("Login failed. Your password is incorrect. Please try again.", e.getMessage());
-        // assertEquals(false, isEmailValid);
+        Exception e = assertThrows(InvalidInputException.class, () -> service.isAuthenticationValidated(userToRegister.getEmail(), userToRegister.getPassword()));
+        assertEquals(userToRegister.getEmail() + " is invalid. Please correct and try again", e.getMessage());
     }
+
+    // additional tests for Postman
+    // 1. duplicate email: output "[email] already has an account"
+    // 2. invalid password: output "Login failed. Your password is incorrect. Please try again."
+    // 3. update token: new token is created and previous token is invalid
 }
